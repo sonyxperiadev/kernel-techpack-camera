@@ -15,8 +15,8 @@
 
 #include <linux/tracepoint.h>
 #include <media/cam_req_mgr.h>
-#include "cam_req_mgr_core.h"
-#include "cam_req_mgr_interface.h"
+#include "../cam_req_mgr/cam_req_mgr_core.h"
+#include "../cam_req_mgr/cam_req_mgr_interface.h"
 #include "cam_context.h"
 
 TRACE_EVENT(cam_context_state,
