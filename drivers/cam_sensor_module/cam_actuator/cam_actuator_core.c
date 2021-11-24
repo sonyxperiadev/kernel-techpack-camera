@@ -198,6 +198,20 @@ static int32_t cam_actuator_i2c_modes_util(
 			i2c_list->i2c_settings.reg_setting[0].reg_data = bu64253_dac & 0x00FF;
 		}
 
+		/* cn3927e: override i2c commands for set_dac */
+		if (io_master_info->cci_client->sid == (0x18 >> 1) &&
+		    i2c_list->i2c_settings.reg_setting[0].reg_addr == 0x3F &&
+		    i2c_list->i2c_settings.addr_type == 1 &&
+		    i2c_list->i2c_settings.data_type == 2 &&
+		    i2c_list->i2c_settings.size == 1) {
+			uint16_t cn3927e_dac = i2c_list->i2c_settings.reg_setting[0].reg_data;
+
+			CAM_DBG(CAM_ACTUATOR, "cn3927e: set new dac value %d.", cn3927e_dac);
+			i2c_list->i2c_settings.data_type = 1;
+			i2c_list->i2c_settings.reg_setting[0].reg_addr = (cn3927e_dac >> 4) & 0x3F;
+			i2c_list->i2c_settings.reg_setting[0].reg_data = ((cn3927e_dac << 4) & 0xF0) | 0x05;
+		}
+
 		rc = camera_io_dev_write(io_master_info,
 			&(i2c_list->i2c_settings));
 		if (rc < 0) {
