@@ -3,6 +3,7 @@
  * Copyright (c) 2017-2021, The Linux Foundation. All rights reserved.
  */
 
+#include <linux/leds-qpnp-flash.h>
 #include <linux/module.h>
 
 #include "cam_sensor_cmn_header.h"

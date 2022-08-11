@@ -208,7 +208,7 @@ void cam_free_clear(const void * ptr)
 #else
 void cam_free_clear(const void * ptr)
 {
-	kzfree(ptr);
+	kfree_sensitive(ptr);
 }
 #endif
 
