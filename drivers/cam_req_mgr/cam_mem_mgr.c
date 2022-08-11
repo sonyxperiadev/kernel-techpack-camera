@@ -11,6 +11,7 @@
 #include <linux/dma-buf.h>
 #include <linux/version.h>
 #include <linux/debugfs.h>
+#include <linux/ion.h>
 #if IS_REACHABLE(CONFIG_DMABUF_HEAPS)
 #include <linux/mem-buf.h>
 #include <soc/qcom/secure_buffer.h>
