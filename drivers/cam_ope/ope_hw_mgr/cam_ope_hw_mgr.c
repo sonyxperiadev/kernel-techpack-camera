@@ -126,7 +126,7 @@ static int cam_ope_mgr_process_cmd(void *priv, void *data)
 
 	if (task_data->req_id <= ctx_data->last_flush_req) {
 		CAM_WARN(CAM_OPE,
-			"request %lld has been flushed, reject packet",
+			"request %lld has been flushed, last flush req %lld, reject packet",
 			task_data->req_id, ctx_data->last_flush_req);
 		mutex_unlock(&hw_mgr->hw_mgr_mutex);
 		return -EINVAL;
@@ -1792,7 +1792,7 @@ static int cam_ope_mgr_create_kmd_buf(struct cam_ope_hw_mgr *hw_mgr,
 	prepare_req.frame_process =
 		(struct ope_frame_process *)ope_cmd_buf_addr;
 
-	for (i = 0; i < ope_hw_mgr->num_ope; i++)
+	for (i = 0; i < ope_hw_mgr->num_ope; i++) {
 		rc = hw_mgr->ope_dev_intf[i]->hw_ops.process_cmd(
 			hw_mgr->ope_dev_intf[i]->hw_priv,
 			OPE_HW_PREPARE, &prepare_req, sizeof(prepare_req));
@@ -1800,7 +1800,7 @@ static int cam_ope_mgr_create_kmd_buf(struct cam_ope_hw_mgr *hw_mgr,
 			CAM_ERR(CAM_OPE, "OPE Dev prepare failed: %d", rc);
 			goto end;
 		}
-
+	}
 end:
 	return rc;
 }
@@ -3547,7 +3547,7 @@ static int cam_ope_mgr_hw_open_u(void *hw_priv, void *fw_download_args)
 	return rc;
 }
 
-static cam_ope_mgr_hw_close_u(void *hw_priv, void *hw_close_args)
+static int cam_ope_mgr_hw_close_u(void *hw_priv, void *hw_close_args)
 {
 	struct cam_ope_hw_mgr *hw_mgr;
 	int rc = 0;
@@ -3959,36 +3959,28 @@ cmd_work_failed:
 
 static int cam_ope_create_debug_fs(void)
 {
-	ope_hw_mgr->dentry = debugfs_create_dir("camera_ope",
-		NULL);
+	int rc = 0;
+	struct dentry *dbgfileptr = NULL;
 
-	if (!ope_hw_mgr->dentry) {
+	dbgfileptr = debugfs_create_dir("camera_ope", NULL);
+
+	if (!dbgfileptr) {
 		CAM_ERR(CAM_OPE, "failed to create dentry");
-		return -ENOMEM;
+		rc = ENOMEM;
+		goto end;
 	}
 
-	if (!debugfs_create_bool("frame_dump_enable",
-		0644,
-		ope_hw_mgr->dentry,
-		&ope_hw_mgr->frame_dump_enable)) {
-		CAM_ERR(CAM_OPE,
-			"failed to create dump_enable_debug");
-		goto err;
-	}
+	ope_hw_mgr->dentry = dbgfileptr;
 
-	if (!debugfs_create_bool("dump_req_data_enable",
-		0644,
-		ope_hw_mgr->dentry,
-		&ope_hw_mgr->dump_req_data_enable)) {
-		CAM_ERR(CAM_OPE,
-			"failed to create dump_enable_debug");
-		goto err;
-	}
+	debugfs_create_bool("frame_dump_enable", 0644,
+		ope_hw_mgr->dentry, &ope_hw_mgr->frame_dump_enable);
 
-	return 0;
-err:
-	debugfs_remove_recursive(ope_hw_mgr->dentry);
-	return -ENOMEM;
+	debugfs_create_bool("dump_req_data_enable", 0644,
+		ope_hw_mgr->dentry, &ope_hw_mgr->dump_req_data_enable);
+
+end:
+	return rc;
+
 }
 
 
