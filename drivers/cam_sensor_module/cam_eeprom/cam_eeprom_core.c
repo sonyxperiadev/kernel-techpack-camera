@@ -29,6 +29,9 @@ static int cam_eeprom_read_memory(struct cam_eeprom_ctrl_t *e_ctrl,
 {
 	int                                rc = 0;
 	int                                j;
+#if defined(CONFIG_ARCH_SONY_MURRAY) || defined(CONFIG_ARCH_SONY_ZAMBEZI)
+	int                                i;
+#endif
 	struct cam_sensor_i2c_reg_setting  i2c_reg_settings = {0};
 	struct cam_sensor_i2c_reg_array    i2c_reg_array = {0};
 	struct cam_eeprom_memory_map_t    *emap = block->map;
@@ -104,17 +107,36 @@ static int cam_eeprom_read_memory(struct cam_eeprom_ctrl_t *e_ctrl,
 		}
 
 		if (emap[j].mem.valid_size) {
-			rc = camera_io_dev_read_seq(&e_ctrl->io_master_info,
-				emap[j].mem.addr, memptr,
-				emap[j].mem.addr_type,
-				emap[j].mem.data_type,
-				emap[j].mem.valid_size);
-			if (rc < 0) {
-				CAM_ERR(CAM_EEPROM, "read failed rc %d",
-					rc);
-				return rc;
+#if defined(CONFIG_ARCH_SONY_MURRAY) || defined(CONFIG_ARCH_SONY_ZAMBEZI)
+			if (eb_info->i2c_info.slave_addr == 0x40 || eb_info->i2c_info.slave_addr == 0x42) {
+				for (i = 0; i < emap[j].mem.valid_size; i++) {
+					rc = camera_io_dev_read_seq(&e_ctrl->io_master_info,
+						emap[j].mem.addr, memptr,
+						emap[j].mem.addr_type,
+						emap[j].mem.data_type, 1);
+					if (rc < 0) {
+						CAM_ERR(CAM_EEPROM, "read failed rc %d",
+							rc);
+						return rc;
+					}
+					memptr++;
+				}
+			} else {
+#endif
+				rc = camera_io_dev_read_seq(&e_ctrl->io_master_info,
+					emap[j].mem.addr, memptr,
+					emap[j].mem.addr_type,
+					emap[j].mem.data_type,
+					emap[j].mem.valid_size);
+				if (rc < 0) {
+					CAM_ERR(CAM_EEPROM, "read failed rc %d",
+						rc);
+					return rc;
+				}
+				memptr += emap[j].mem.valid_size;
+#if defined(CONFIG_ARCH_SONY_MURRAY) || defined(CONFIG_ARCH_SONY_ZAMBEZI)
 			}
-			memptr += emap[j].mem.valid_size;
+#endif
 		}
 
 		if (emap[j].pageen.valid_size) {
