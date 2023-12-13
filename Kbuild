@@ -3,7 +3,6 @@
 KERNEL_ROOT := $(srctree)
 CAMERA_KERNEL_ROOT := $(KERNEL_ROOT)/techpack/camera
 
-
 ifeq ($(CONFIG_QCOM_CAMERA_DEBUG), y)
 $(info "CAMERA_KERNEL_ROOT is: $(CAMERA_KERNEL_ROOT)")
 $(info "KERNEL_ROOT is: $(KERNEL_ROOT)")
@@ -298,5 +297,5 @@ camera-$(CONFIG_SPECTRA_TFE) += \
 
 camera-y += drivers/camera_main.o
 
-obj-m += camera.o
+obj-y += camera.o
 BOARD_VENDOR_KERNEL_MODULES += $(KERNEL_MODULES_OUT)/camera.ko
