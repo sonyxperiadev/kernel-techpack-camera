@@ -177,6 +177,11 @@ camera-$(CONFIG_LEDS_QPNP_FLASH_V2) += \
 	cam_sensor_module/cam_flash/cam_flash_core.o \
 	cam_sensor_module/cam_flash/cam_flash_soc.o
 
+ifneq (,$(filter $(CONFIG_ARCH_SONY_MURRAY) $(CONFIG_ARCH_SONY_ZAMBEZI),y m))
+camera-$(CONFIG_LEDS_QPNP_FLASH_V2) += \
+	cam_sensor_module/cam_flash/cam_murray_flash.o
+endif
+
 ifneq (,$(filter $(CONFIG_LEDS_QTI_FLASH),y m))
 camera-y += \
 	cam_sensor_module/cam_flash/cam_flash_dev.o \
