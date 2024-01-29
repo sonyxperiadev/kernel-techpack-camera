@@ -10,6 +10,8 @@
 #include "cam_common_util.h"
 #include "camera_main.h"
 
+#include "cam_murray_flash.h"
+
 static int32_t cam_flash_driver_cmd(struct cam_flash_ctrl *fctrl,
 		void *arg, struct cam_flash_private_soc *soc_private)
 {
@@ -538,7 +540,14 @@ static int cam_flash_component_bind(struct device *dev,
 	mutex_init(&(fctrl->flash_mutex));
 
 	fctrl->flash_state = CAM_FLASH_STATE_INIT;
+
+#if IS_REACHABLE(CONFIG_ARCH_SONY_MURRAY) || \
+	IS_REACHABLE(CONFIG_ARCH_SONY_ZAMBEZI)
+	cam_murray_flash_control_create_device(&pdev->dev);
+#endif
+
 	CAM_DBG(CAM_FLASH, "Component bound successfully");
+
 	return rc;
 
 free_cci_resource:
@@ -566,6 +575,11 @@ static void cam_flash_component_unbind(struct device *dev,
 		CAM_ERR(CAM_FLASH, "Flash device is NULL");
 		return;
 	}
+
+#if IS_REACHABLE(CONFIG_ARCH_SONY_MURRAY) || \
+	IS_REACHABLE(CONFIG_ARCH_SONY_ZAMBEZI)
+	cam_murray_flash_control_remove_device(&pdev->dev);
+#endif
 
 	mutex_lock(&fctrl->flash_mutex);
 	cam_flash_shutdown(fctrl);

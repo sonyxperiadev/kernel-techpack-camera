@@ -58,6 +58,8 @@
 #include "cam_csid_ppi100.h"
 #include "camera_main.h"
 
+#include "cam_murray_flash.h"
+
 struct camera_submodule_component {
 	int (*init)(void);
 	void (*exit)(void);
@@ -111,6 +113,10 @@ static const struct camera_submodule_component camera_sensor[] = {
 #if IS_REACHABLE(CONFIG_LEDS_QPNP_FLASH_V2) || \
 	IS_REACHABLE(CONFIG_LEDS_QTI_FLASH)
 	{&cam_flash_init_module, &cam_flash_exit_module},
+#if IS_REACHABLE(CONFIG_ARCH_SONY_MURRAY) || \
+	IS_REACHABLE(CONFIG_ARCH_SONY_ZAMBEZI)
+	{&cam_murray_flash_init_module, &cam_murray_flash_exit_module},
+#endif
 #endif
 #endif
 };

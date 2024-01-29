@@ -3,6 +3,7 @@
  * Copyright (c) 2017-2021, The Linux Foundation. All rights reserved.
  */
 
+#include <linux/math64.h>
 #include <linux/module.h>
 
 #include "cam_sensor_cmn_header.h"
@@ -10,7 +11,11 @@
 #include "cam_res_mgr_api.h"
 #include "cam_common_util.h"
 #include "cam_packet_util.h"
-#include <linux/math64.h>
+
+#if IS_REACHABLE(CONFIG_ARCH_SONY_MURRAY) || \
+	IS_REACHABLE(CONFIG_ARCH_SONY_ZAMBEZI)
+#include "cam_murray_flash.h"
+#endif
 
 static uint default_on_timer = 2;
 module_param(default_on_timer, uint, 0644);
@@ -479,6 +484,14 @@ int cam_flash_off(struct cam_flash_ctrl *flash_ctrl)
 			"cannot apply streamoff settings");
 		}
 	}
+
+#if IS_REACHABLE(CONFIG_ARCH_SONY_MURRAY) || \
+	IS_REACHABLE(CONFIG_ARCH_SONY_ZAMBEZI)
+	rc = cam_murray_flash_set_mode(flash_ctrl, CAMERA_SENSOR_FLASH_OP_OFF);
+	if (rc < 0)
+		CAM_ERR(CAM_FLASH, "Murray fire off failed: %d", rc);
+#endif
+
 	return 0;
 }
 
@@ -504,6 +517,13 @@ static int cam_flash_low(
 	if (rc)
 		CAM_ERR(CAM_FLASH, "Fire Torch failed: %d", rc);
 
+#if IS_REACHABLE(CONFIG_ARCH_SONY_MURRAY) || \
+	IS_REACHABLE(CONFIG_ARCH_SONY_ZAMBEZI)
+	rc = cam_murray_flash_set_mode(flash_ctrl, CAMERA_SENSOR_FLASH_OP_FIRELOW);
+	if (rc < 0)
+		CAM_ERR(CAM_FLASH, "Murray fire torch failed: %d", rc);
+#endif
+
 	return rc;
 }
 
@@ -528,6 +548,13 @@ static int cam_flash_high(
 		CAMERA_SENSOR_FLASH_OP_FIREHIGH);
 	if (rc)
 		CAM_ERR(CAM_FLASH, "Fire Flash Failed: %d", rc);
+
+#if IS_REACHABLE(CONFIG_ARCH_SONY_MURRAY) || \
+	IS_REACHABLE(CONFIG_ARCH_SONY_ZAMBEZI)
+	rc = cam_murray_flash_set_mode(flash_ctrl, CAMERA_SENSOR_FLASH_OP_FIREHIGH);
+	if (rc < 0)
+		CAM_ERR(CAM_FLASH, "Murray fire flash failed: %d", rc);
+#endif
 
 	return rc;
 }
