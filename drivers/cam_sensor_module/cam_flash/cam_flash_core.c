@@ -4,7 +4,6 @@
  * Copyright (c) 2022-2024, Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
-#include <linux/leds-qpnp-flash.h>
 #include <linux/module.h>
 
 #include "cam_sensor_cmn_header.h"
