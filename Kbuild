@@ -29,6 +29,10 @@ ifeq ($(CONFIG_ARCH_BENGAL), y)
 include $(CAMERA_KERNEL_ROOT)/config/holi.mk
 endif
 
+ifeq ($(CONFIG_ARCH_BLAIR), y)
+include $(CAMERA_KERNEL_ROOT)/config/holi.mk
+endif
+
 ifeq ($(CONFIG_ARCH_HOLI), y)
 include $(CAMERA_KERNEL_ROOT)/config/holi.mk
 endif
