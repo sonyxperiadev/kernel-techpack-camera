@@ -431,7 +431,7 @@ end:
 
 static int cam_ope_mgr_put_cmd_buf(struct cam_packet *packet)
 {
-	int i = 0;
+	int i = 0, rc = 0;
 	struct cam_cmd_buf_desc *cmd_desc = NULL;
 
 	cmd_desc = (struct cam_cmd_buf_desc *)
@@ -1792,7 +1792,7 @@ static int cam_ope_mgr_create_kmd_buf(struct cam_ope_hw_mgr *hw_mgr,
 	prepare_req.frame_process =
 		(struct ope_frame_process *)ope_cmd_buf_addr;
 
-	for (i = 0; i < ope_hw_mgr->num_ope; i++)
+	for (i = 0; i < ope_hw_mgr->num_ope; i++) {
 		rc = hw_mgr->ope_dev_intf[i]->hw_ops.process_cmd(
 			hw_mgr->ope_dev_intf[i]->hw_priv,
 			OPE_HW_PREPARE, &prepare_req, sizeof(prepare_req));
@@ -1800,6 +1800,7 @@ static int cam_ope_mgr_create_kmd_buf(struct cam_ope_hw_mgr *hw_mgr,
 			CAM_ERR(CAM_OPE, "OPE Dev prepare failed: %d", rc);
 			goto end;
 		}
+	}
 
 end:
 	return rc;
