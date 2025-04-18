@@ -104,9 +104,6 @@ int32_t camera_io_dev_read_seq(struct camera_io_master *io_master_info,
 	} else if (io_master_info->master_type == SPI_MASTER) {
 		return cam_spi_read_seq(io_master_info,
 			addr, data, addr_type, num_bytes);
-	} else if (io_master_info->master_type == SPI_MASTER) {
-		return cam_spi_write_seq(io_master_info,
-			addr, data, addr_type, num_bytes);
 	} else {
 		CAM_ERR(CAM_SENSOR, "Invalid Comm. Master:%d",
 			io_master_info->master_type);
