@@ -3419,6 +3419,51 @@ static struct cam_hw_info *cam_cpas_kobj_to_cpas_hw(struct kobject *kobj)
 	return container_of(kobj, struct cam_cpas_kobj_map, base_kobj)->cpas_hw;
 }
 
+#if defined(CONFIG_QTI_LEGACY_CAMX)
+static ssize_t cam_cpas_sysfs_get_subparts_info(struct kobject *kobj, struct kobj_attribute *attr,
+	char *buf)
+{
+	int len = 0;
+	struct cam_hw_info *cpas_hw = cam_cpas_kobj_to_cpas_hw(kobj);
+	struct cam_cpas_private_soc *soc_private = NULL;
+	struct cam_cpas_sysfs_info *sysfs_info = NULL;
+
+	mutex_lock(&cpas_hw->hw_mutex);
+	soc_private = (struct cam_cpas_private_soc *) cpas_hw->soc_info.soc_private;
+	sysfs_info  = &soc_private->sysfs_info;
+
+	len += scnprintf(buf, PAGE_SIZE, "num_ifes: 0x%x, 0x%x\nnum_ife_lites: 0x%x, 0x%x\n"
+		"num_sfes: 0x%x, 0x%x\nnum_custom: 0x%x, 0x%x\n",
+		soc_private->sysfs_info.num_ifes,
+		soc_private->sysfs_info.num_ifes,
+		soc_private->sysfs_info.num_ife_lites,
+		soc_private->sysfs_info.num_ife_lites,
+		soc_private->sysfs_info.num_sfes,
+		soc_private->sysfs_info.num_sfes,
+		soc_private->sysfs_info.num_custom,
+		soc_private->sysfs_info.num_custom);
+	/*
+	 * subparts_info sysfs string looks like below.
+	 * num_ifes: 0x3, 0x3 (If all IFEs are available)/0x2 (If 1 IFE is unavailable)
+	 * num_ife_lites: 0x2, 0x2
+	 * num_sfes: 0x3, 0x3 (If all SFEs are available)/0x2 (If 1 SFE is unavailable)
+	 * num_custom: 0x0, 0x0
+	 * 
+	 * The current driver does not report information about functional subparts,
+	 * but since the number of functional subparts is always equal to the number
+	 * of available ones, we simply reuse that value.
+	 */
+
+	if (len >= PAGE_SIZE) {
+		CAM_ERR(CAM_CPAS, "camera subparts info sysfs string is truncated, len: %d", len);
+		mutex_unlock(&cpas_hw->hw_mutex);
+		return -EOVERFLOW;
+	}
+
+	mutex_unlock(&cpas_hw->hw_mutex);
+	return len;
+}
+#else
 static ssize_t cam_cpas_sysfs_get_subparts_info(struct kobject *kobj, struct kobj_attribute *attr,
 	char *buf)
 {
@@ -3456,6 +3501,7 @@ static ssize_t cam_cpas_sysfs_get_subparts_info(struct kobject *kobj, struct kob
 	mutex_unlock(&cpas_hw->hw_mutex);
 	return len;
 }
+#endif
 
 static struct kobj_attribute cam_subparts_info_attribute = __ATTR(subparts_info, 0444,
 	cam_cpas_sysfs_get_subparts_info, NULL);
